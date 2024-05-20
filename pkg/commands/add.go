@@ -3,8 +3,6 @@ package commands
 import (
 	"log"
 
-	"github.com/Amabeusz/vcs/pkg/common"
-	"github.com/Amabeusz/vcs/pkg/file"
 	"github.com/Amabeusz/vcs/pkg/objects"
 )
 
@@ -22,9 +20,6 @@ func addFile(filePath string) {
 }
 
 func addBlobFile(filePath string) {
-	content := file.Read(filePath)
-	fileSha := common.FileSha(content)
-
-	objects.CreateBlobFile(fileSha, content)
+	fileSha := objects.SaveBlob(filePath)
 	objects.AddBlobToIndex(fileSha, filePath)
 }

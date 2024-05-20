@@ -3,30 +3,23 @@ package objects
 import (
 	"fmt"
 
-	"github.com/Amabeusz/vcs/pkg/file"
-	"github.com/Amabeusz/vcs/pkg/global"
+	"github.com/Amabeusz/vcs/pkg/config"
 )
 
-func createCommit(title string) []byte {
+func CreateCommit(msg string) {
 	content := []byte("commit\n")
 
-	author := "author"
-
-	parent := getHeadSha()
+	head := string(Head())
+	parent := RefSha(head)
 	tree := createTree()
 
 	content = append(content, []byte(fmt.Sprintf("tree: %v\n", tree))...)
-	if len(parent) != 0 {
-		content = append(content, []byte(fmt.Sprintf("parent: %v\n", parent))...)
+	if parent != nil {
+		content = append(content, []byte(fmt.Sprintf("parent: %v\n", string(parent)))...)
 	}
-	content = append(content, []byte(fmt.Sprintf("author: %v\n\n", author))...)
-	content = append(content, []byte(fmt.Sprintf("\t%v", title))...)
+	content = append(content, []byte(fmt.Sprintf("author: %v\n\n", config.User()))...)
+	content = append(content, []byte(msg)...)
 
-	return content
-}
-
-func getHeadSha() []byte {
-	headContent := file.Read(global.HEAD_FILE)
-
-	return file.Read(global.VCS_PATH + "\\" + string(headContent[5:]))
+	commitSha := SaveObject(content)
+	UpdateRef(head, []byte(commitSha))
 }

@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	//initCommand := flag.NewFlagSet("init", flag.ExitOnError)
-	//statusCommand := flag.NewFlagSet("status", flag.ExitOnError)
+	// initCommand := flag.NewFlagSet("init", flag.ExitOnError)
+	// statusCommand := flag.NewFlagSet("status", flag.ExitOnError)
 
 	if len(os.Args) < 2 {
 		fmt.Println("usage: vcs <command> [<args>]")
@@ -26,8 +26,9 @@ func main() {
 	case "add":
 		checkArgs(3)
 		commands.Add(os.Args[2])
-		//	case "commit":
-		//		//	commit()
+	case "commit":
+		checkArgs(3)
+		commands.Commit(os.Args[2])
 	case "cat-file":
 		checkArgs(3)
 		if len(os.Args) == 3 {
