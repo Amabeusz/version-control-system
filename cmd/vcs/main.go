@@ -19,8 +19,8 @@ func main() {
 	switch os.Args[1] {
 	//	case "init":
 	//		commands.Init()
-	//	case "status":
-	//		commands.PrintStatus()
+	case "status":
+		commands.Status()
 	//	case "help":
 	//		fmt.Println("help [status | init]")
 	case "add":
