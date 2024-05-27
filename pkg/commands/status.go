@@ -2,37 +2,60 @@ package commands
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/Amabeusz/vcs/pkg/common"
+	"github.com/Amabeusz/vcs/pkg/file"
 	"github.com/Amabeusz/vcs/pkg/objects"
 )
 
 func Status() {
 	files := getAllFiles(common.GetRootPath())
 
-	//for _, v := range files {
-	//	fmt.Println(v)
-	//}
-
 	indexFiles := getFiles()
 
-	fmt.Println(indexFiles)
+	stagedFiles := make([]string, 0)
 
 	for _, v := range files {
-		// fmt.Printf("Comparing %v to %v\n", v, indexFiles[v])
-		if indexFiles[v] != 1 {
-			fmt.Printf("New file %v\n", v)
+
+		if _, ok := indexFiles[v]; !ok {
+			fmt.Printf("new %v\n", v)
 			continue
 		}
 
-		// if string(indexFiles[v]) != common.FileSha(file.Read(v[14:])) {
-		fmt.Printf("File changed %v\n", v)
-		//}
+		// change to sha on last commit
+		fileSha := common.FileSha(file.Read(lastElement(v)))
 
+		// if string(indexFiles[v]) == fileSha {
+		// dont show - not changed
+
+		if string(indexFiles[v]) != fileSha {
+			stagedFiles = append(stagedFiles, "updated "+v)
+		}
 	}
+
+	fmt.Println("Staged")
+
+	for _, v := range stagedFiles {
+		fmt.Println(v)
+	}
+}
+
+func lastElement(str string) string {
+	if str == "" {
+		log.Fatal("The string is empty")
+	}
+
+	parts := strings.Split(str, "\\")
+	if len(parts) == 0 {
+		log.Fatal("No parts found")
+	}
+
+	last := parts[len(parts)-1]
+	return last
 }
 
 func getAllFiles(dir string) []string {
@@ -53,20 +76,20 @@ func getAllFiles(dir string) []string {
 	return files
 }
 
-func getFiles() map[string]int {
+func getFiles() map[string]string {
 	root := common.GetRootPath()
 	status := objects.ReadIndex()
 
 	s := strings.Fields(string(status))
 
-	files := make(map[string]int, 0)
+	files := make(map[string]string, 0)
 
 	for i, v := range s {
 		if i%2 == 0 {
 			continue
 		}
 
-		files[root+"\\"+v] = 1
+		files[root+"\\"+v] = s[i-1]
 	}
 
 	return files
