@@ -28,10 +28,10 @@ func PrintStatus() {
 	}
 
 	repoNew := make([]string, 0)
-	repoUpdated := make([]string, 0)
+	repoModified := make([]string, 0)
 	repoDeleted := make([]string, 0)
 	indexNew := make([]string, 0)
-	indexUpdated := make([]string, 0)
+	indexModified := make([]string, 0)
 	indexDeleted := make([]string, 0)
 
 	notChanged := make([]string, 0)
@@ -45,13 +45,13 @@ func PrintStatus() {
 				delete(headFiles, f)
 
 				if common.FileSha(file.Read(f)) != indexValue {
-					indexUpdated = append(indexUpdated, f)
+					indexModified = append(indexModified, f)
 				} else {
 					notChanged = append(notChanged, f)
 				}
 			} else {
 				if common.FileSha(file.Read(f)) != indexValue {
-					repoUpdated = append(repoUpdated, f)
+					repoModified = append(repoModified, f)
 				} else {
 					indexNew = append(indexNew, f)
 				}
@@ -62,7 +62,7 @@ func PrintStatus() {
 				delete(headFiles, f)
 
 				if common.FileSha(file.Read(f)) != headValue {
-					repoUpdated = append(repoUpdated, f)
+					repoModified = append(repoModified, f)
 				} else {
 					notChanged = append(notChanged, f)
 				}
@@ -85,34 +85,34 @@ func PrintStatus() {
 
 	fmt.Println("\tNew files:")
 	for _, v := range repoNew {
-		fmt.Println("\t\t" + v)
+		fmt.Println("\033[32m\t\t" + v + "\033[0m")
 	}
 
-	fmt.Println("\tUpdated files:")
-	for _, v := range repoUpdated {
-		fmt.Println("\t\t" + v)
+	fmt.Println("\tModified files:")
+	for _, v := range repoModified {
+		fmt.Println("\033[33m\t\t" + v + "\033[0m")
 	}
 
 	fmt.Println("\tDeleted files:")
 	for _, v := range repoDeleted {
-		fmt.Println("\t\t" + v)
+		fmt.Println("\033[31m\t\t" + v + "\033[0m")
 	}
 
 	fmt.Println("Staged")
 
 	fmt.Println("\tNew files:")
 	for _, v := range indexNew {
-		fmt.Println("\t\t" + v)
+		fmt.Println("\033[32m\t\t" + v + "\033[0m")
 	}
 
-	fmt.Println("\tUpdated files:")
-	for _, v := range indexUpdated {
-		fmt.Println("\t\t" + v)
+	fmt.Println("\tModified files:")
+	for _, v := range indexModified {
+		fmt.Println("\033[33m\t\t" + v + "\033[0m")
 	}
 
 	fmt.Println("\tDeleted files:")
 	for _, v := range indexDeleted {
-		fmt.Println("\t\t" + v)
+		fmt.Println("\033[31m\t\t" + v + "\033[0m")
 	}
 
 	fmt.Println("\nNot chenged:")
