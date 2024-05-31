@@ -7,7 +7,7 @@ import (
 )
 
 func ReadObject(objectSha string) []byte {
-	content := file.Read(global.OBJECTS_PATH + objectSha)
+	content := file.ReadRoot(global.OBJECTS_PATH + objectSha)
 	return common.Decompress(content)
 }
 

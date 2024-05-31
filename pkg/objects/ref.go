@@ -8,8 +8,7 @@ import (
 )
 
 func RefSha(ref string) []byte {
-	return file.Read(global.REFS_PATH + "master")
-	// return file.Read(global.REFS_PATH + ref)
+	return file.ReadRoot(global.REFS_PATH + "master")
 }
 
 func UpdateRef(head string, commitSha []byte) {

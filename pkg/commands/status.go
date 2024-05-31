@@ -12,35 +12,112 @@ import (
 	"github.com/Amabeusz/vcs/pkg/objects"
 )
 
-func Status() {
+func PrintStatus() {
 	files := getAllFiles(common.GetRootPath())
+	headFiles := objects.GetHeadFiles()
+	indexFiles := objects.GetIndexFiles()
 
-	indexFiles := getFiles()
+	fmt.Println("head: ")
+	for k := range headFiles {
+		fmt.Println(k)
+	}
 
-	stagedFiles := make([]string, 0)
+	fmt.Println("index: ")
+	for k := range indexFiles {
+		fmt.Println(k)
+	}
 
-	for _, v := range files {
+	repoNew := make([]string, 0)
+	repoUpdated := make([]string, 0)
+	repoDeleted := make([]string, 0)
+	indexNew := make([]string, 0)
+	indexUpdated := make([]string, 0)
+	indexDeleted := make([]string, 0)
 
-		if _, ok := indexFiles[v]; !ok {
-			fmt.Printf("new %v\n", v)
-			continue
+	notChanged := make([]string, 0)
+
+	for _, f := range files {
+		fmt.Println("file: " + f)
+		if indexValue, ok := indexFiles[f]; ok {
+			// staged
+			delete(indexFiles, f)
+			if _, ok := headFiles[f]; ok {
+				delete(headFiles, f)
+
+				if common.FileSha(file.Read(f)) != indexValue {
+					indexUpdated = append(indexUpdated, f)
+				} else {
+					notChanged = append(notChanged, f)
+				}
+			} else {
+				if common.FileSha(file.Read(f)) != indexValue {
+					repoUpdated = append(repoUpdated, f)
+				} else {
+					indexNew = append(indexNew, f)
+				}
+			}
+		} else {
+			// repo
+			if headValue, ok := headFiles[f]; ok {
+				delete(headFiles, f)
+
+				if common.FileSha(file.Read(f)) != headValue {
+					repoUpdated = append(repoUpdated, f)
+				} else {
+					notChanged = append(notChanged, f)
+				}
+			} else {
+				repoNew = append(repoNew, f)
+			}
 		}
+	}
 
-		// change to sha on last commit
-		fileSha := common.FileSha(file.Read(lastElement(v)))
+	for k := range indexFiles {
+		indexDeleted = append(indexDeleted, k)
+		delete(headFiles, k)
+	}
 
-		// if string(indexFiles[v]) == fileSha {
-		// dont show - not changed
+	for k := range headFiles {
+		repoDeleted = append(repoDeleted, k)
+	}
 
-		if string(indexFiles[v]) != fileSha {
-			stagedFiles = append(stagedFiles, "updated "+v)
-		}
+	fmt.Println("Not staged")
+
+	fmt.Println("\tNew files:")
+	for _, v := range repoNew {
+		fmt.Println("\t\t" + v)
+	}
+
+	fmt.Println("\tUpdated files:")
+	for _, v := range repoUpdated {
+		fmt.Println("\t\t" + v)
+	}
+
+	fmt.Println("\tDeleted files:")
+	for _, v := range repoDeleted {
+		fmt.Println("\t\t" + v)
 	}
 
 	fmt.Println("Staged")
 
-	for _, v := range stagedFiles {
-		fmt.Println(v)
+	fmt.Println("\tNew files:")
+	for _, v := range indexNew {
+		fmt.Println("\t\t" + v)
+	}
+
+	fmt.Println("\tUpdated files:")
+	for _, v := range indexUpdated {
+		fmt.Println("\t\t" + v)
+	}
+
+	fmt.Println("\tDeleted files:")
+	for _, v := range indexDeleted {
+		fmt.Println("\t\t" + v)
+	}
+
+	fmt.Println("\nNot chenged:")
+	for _, v := range notChanged {
+		fmt.Println("\t" + v)
 	}
 }
 
@@ -66,31 +143,13 @@ func getAllFiles(dir string) []string {
 			if info.Name() == ".git" || info.Name() == ".vcs" {
 				return filepath.SkipDir
 			}
+			return nil
 		}
 
 		files = append(files, path)
 		return nil
 	})
 	common.Check(err)
-
-	return files
-}
-
-func getFiles() map[string]string {
-	root := common.GetRootPath()
-	status := objects.ReadIndex()
-
-	s := strings.Fields(string(status))
-
-	files := make(map[string]string, 0)
-
-	for i, v := range s {
-		if i%2 == 0 {
-			continue
-		}
-
-		files[root+"\\"+v] = s[i-1]
-	}
 
 	return files
 }

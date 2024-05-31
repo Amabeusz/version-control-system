@@ -20,7 +20,7 @@ func main() {
 	//	case "init":
 	//		commands.Init()
 	case "status":
-		commands.Status()
+		commands.PrintStatus()
 	//	case "help":
 	//		fmt.Println("help [status | init]")
 	case "add":

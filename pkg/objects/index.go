@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/Amabeusz/vcs/pkg/common"
 	"github.com/Amabeusz/vcs/pkg/file"
 	"github.com/Amabeusz/vcs/pkg/global"
 )
@@ -23,11 +24,11 @@ func AddBlobToIndex(sha string, filePath string) {
 		return
 	}
 
-	AddToIndex([]byte(sha + " " + filePath + "\n"))
+	AddToIndex(sha, filePath)
 }
 
-func AddToIndex(s []byte) {
-	file.FindAndWrite(global.INDEX_FILE, s)
+func AddToIndex(sha string, filePath string) {
+	file.FindAndWrite(global.INDEX_FILE, []byte(sha+" "+filePath+"\n"))
 }
 
 func RemoveFromIndex(filePath string) {
@@ -54,7 +55,7 @@ func ReplaceInIndex(sha string, filePath string) {
 }
 
 func ReadIndex() []byte {
-	return file.Read(global.INDEX_FILE)
+	return file.ReadRoot(global.INDEX_FILE)
 }
 
 func shaInIndex(filePath string) string {
@@ -72,4 +73,17 @@ func shaInIndex(filePath string) string {
 	}
 
 	return mapp[filePath]
+}
+
+func GetIndexFiles() map[string]string {
+	root := common.GetRootPath()
+	content := strings.Fields(string(ReadIndex()))
+
+	files := make(map[string]string, 0)
+
+	for i := 0; i < len(content); i += 2 {
+		files[root+"\\"+content[i+1]] = content[i]
+	}
+
+	return files
 }

@@ -9,10 +9,14 @@ import (
 	"github.com/Amabeusz/vcs/pkg/common"
 )
 
-func Read(filePath string) []byte {
+func ReadRoot(filePath string) []byte {
 	path := common.GetRootPath() + "\\" + filePath
-	fmt.Println(path)
-	file, err := os.Open(path)
+	return Read(path)
+}
+
+func Read(filePath string) []byte {
+	log.Println(filePath)
+	file, err := os.Open(filePath)
 	common.Check(err)
 	defer file.Close()
 
@@ -24,7 +28,7 @@ func Read(filePath string) []byte {
 
 func Create(filePath string, content []byte) {
 	path := common.GetRootPath() + "\\" + filePath
-	fmt.Println(path)
+	log.Println(path)
 	file, err := os.Create(filePath)
 	common.Check(err)
 	defer file.Close()
