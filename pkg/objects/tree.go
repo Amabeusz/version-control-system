@@ -1,6 +1,9 @@
 package objects
 
 import (
+	"fmt"
+	"log"
+	"os"
 	"strings"
 
 	"github.com/Amabeusz/vcs/pkg/common"
@@ -9,7 +12,38 @@ import (
 )
 
 func createTree() string {
-	return SaveObject(append([]byte("tree\n"), file.ReadRoot(global.INDEX_FILE)...))
+	content := file.ReadRoot(global.INDEX_FILE)
+
+	newContent := []byte(removeLinesContainingHyphen(string(content)))
+
+	fmt.Println("newContent: " + string(newContent))
+	if len(content) != len(newContent) {
+		file, err := os.OpenFile(common.GetRootPath()+"\\"+global.INDEX_FILE, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer file.Close()
+
+		_, err = file.WriteString(string(newContent))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return SaveObject(append([]byte("tree\n"), newContent...))
+}
+
+func removeLinesContainingHyphen(input string) string {
+	lines := strings.Split(input, "\n")
+	var result []string
+
+	for _, line := range lines {
+		if !strings.Contains(line, "-") {
+			result = append(result, line)
+		}
+	}
+
+	return strings.Join(result, "\n")
 }
 
 func ReadTree(sha string) map[string]string {
@@ -19,7 +53,9 @@ func ReadTree(sha string) map[string]string {
 	files := make(map[string]string, 0)
 
 	for i := 1; i < len(content); i += 2 {
-		files[root+"\\"+content[i+1]] = content[i]
+		if content[i] != "-" {
+			files[root+"\\"+content[i+1]] = content[i]
+		}
 	}
 
 	return files

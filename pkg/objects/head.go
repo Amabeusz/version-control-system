@@ -19,10 +19,14 @@ func Head() []byte {
 
 func GetHeadFiles() map[string]string {
 	head := Head()
-	headRef := string(head[:len(head)-2])
-	ref := ReadRef(headRef)
 
-	return ReadTree(string(ref[:len(ref)-2]))
+	ref := ReadRef(string(head))
+
+	if len(ref) == 0 {
+		return map[string]string{}
+	}
+
+	return ReadTree(string(ref))
 }
 
 func ReadRef(ref string) []byte {

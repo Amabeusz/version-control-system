@@ -17,15 +17,15 @@ func PrintStatus() {
 	headFiles := objects.GetHeadFiles()
 	indexFiles := objects.GetIndexFiles()
 
-	fmt.Println("head: ")
-	for k := range headFiles {
-		fmt.Println(k)
-	}
-
-	fmt.Println("index: ")
-	for k := range indexFiles {
-		fmt.Println(k)
-	}
+	//	fmt.Println("head: ")
+	//	for k := range headFiles {
+	//		fmt.Println(k)
+	//	}
+	//
+	//	fmt.Println("index: ")
+	//	for k := range indexFiles {
+	//		fmt.Println(k)
+	//	}
 
 	repoNew := make([]string, 0)
 	repoModified := make([]string, 0)
@@ -37,30 +37,41 @@ func PrintStatus() {
 	notChanged := make([]string, 0)
 
 	for _, f := range files {
-		fmt.Println("file: " + f)
+		fmt.Println(f)
 		if indexValue, ok := indexFiles[f]; ok {
-			// staged
+			fmt.Println("FOUND IN INDEX")
 			delete(indexFiles, f)
-			if _, ok := headFiles[f]; ok {
+			if headValue, ok := headFiles[f]; ok {
+				fmt.Println("FOUND IN HEAD")
 				delete(headFiles, f)
+				fileSha := common.FileSha(file.Read(f))
+				fmt.Println("fileSHa " + fileSha)
+				fmt.Println("indexValue " + indexValue)
+				fmt.Println("headValue " + headValue)
 
-				if common.FileSha(file.Read(f)) != indexValue {
-					indexModified = append(indexModified, f)
+				if fileSha != indexValue {
+					repoModified = append(repoModified, f)
 				} else {
-					notChanged = append(notChanged, f)
+					if fileSha != headValue {
+						indexModified = append(indexModified, f)
+					} else {
+						notChanged = append(notChanged, f)
+					}
 				}
 			} else {
 				if common.FileSha(file.Read(f)) != indexValue {
-					repoModified = append(repoModified, f)
+					repoNew = append(repoNew, f)
 				} else {
 					indexNew = append(indexNew, f)
 				}
 			}
 		} else {
-			// repo
 			if headValue, ok := headFiles[f]; ok {
 				delete(headFiles, f)
 
+				fmt.Println(f)
+				fmt.Println(common.FileSha(file.Read(f)))
+				fmt.Println(headValue)
 				if common.FileSha(file.Read(f)) != headValue {
 					repoModified = append(repoModified, f)
 				} else {
@@ -72,9 +83,14 @@ func PrintStatus() {
 		}
 	}
 
-	for k := range indexFiles {
-		indexDeleted = append(indexDeleted, k)
-		delete(headFiles, k)
+	for k, v := range indexFiles {
+		if v == "-" {
+			indexDeleted = append(indexDeleted, k)
+			delete(headFiles, k)
+		} else {
+			repoDeleted = append(repoDeleted, k)
+			delete(headFiles, k)
+		}
 	}
 
 	for k := range headFiles {
@@ -115,7 +131,7 @@ func PrintStatus() {
 		fmt.Println("\033[31m\t\t" + v + "\033[0m")
 	}
 
-	fmt.Println("\nNot chenged:")
+	fmt.Println("\nNot changed:")
 	for _, v := range notChanged {
 		fmt.Println("\t" + v)
 	}
