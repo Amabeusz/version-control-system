@@ -21,8 +21,6 @@ func main() {
 		commands.Init()
 	case "status":
 		commands.PrintStatus()
-	//	case "help":
-	//		fmt.Println("help [status | init]")
 	case "add":
 		checkArgs(3)
 		commands.Add(os.Args[2])

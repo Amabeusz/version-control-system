@@ -17,123 +17,97 @@ func PrintStatus() {
 	headFiles := objects.GetHeadFiles()
 	indexFiles := objects.GetIndexFiles()
 
-	//	fmt.Println("head: ")
-	//	for k := range headFiles {
-	//		fmt.Println(k)
-	//	}
-	//
-	//	fmt.Println("index: ")
-	//	for k := range indexFiles {
-	//		fmt.Println(k)
-	//	}
+	repoNew := []string{}
+	repoModified := []string{}
+	repoDeleted := []string{}
+	indexNew := []string{}
+	indexModified := []string{}
+	indexDeleted := []string{}
+	notChanged := []string{}
 
-	repoNew := make([]string, 0)
-	repoModified := make([]string, 0)
-	repoDeleted := make([]string, 0)
-	indexNew := make([]string, 0)
-	indexModified := make([]string, 0)
-	indexDeleted := make([]string, 0)
+	for _, file := range files {
+		processFile(file, headFiles, indexFiles, &repoNew, &repoModified, &indexNew, &indexModified, &notChanged)
+	}
 
-	notChanged := make([]string, 0)
+	processRemainingIndexFiles(indexFiles, headFiles, &repoDeleted, &indexDeleted)
 
-	for _, f := range files {
-		fmt.Println(f)
-		if indexValue, ok := indexFiles[f]; ok {
-			fmt.Println("FOUND IN INDEX")
-			delete(indexFiles, f)
-			if headValue, ok := headFiles[f]; ok {
-				fmt.Println("FOUND IN HEAD")
-				delete(headFiles, f)
-				fileSha := common.FileSha(file.Read(f))
-				fmt.Println("fileSHa " + fileSha)
-				fmt.Println("indexValue " + indexValue)
-				fmt.Println("headValue " + headValue)
+	for headFile := range headFiles {
+		repoDeleted = append(repoDeleted, headFile)
+	}
 
-				if fileSha != indexValue {
-					repoModified = append(repoModified, f)
-				} else {
-					if fileSha != headValue {
-						indexModified = append(indexModified, f)
-					} else {
-						notChanged = append(notChanged, f)
-					}
-				}
+	printStatus("Not staged", repoNew, repoModified, repoDeleted)
+	printStatus("Staged", indexNew, indexModified, indexDeleted)
+	printUnchangedFiles(notChanged)
+}
+
+func processFile(f string, headFiles, indexFiles map[string]string, repoNew, repoModified, indexNew, indexModified, notChanged *[]string) {
+	indexValue, inIndex := indexFiles[f]
+	headValue, inHead := headFiles[f]
+
+	if inIndex {
+		delete(indexFiles, f)
+		if inHead {
+			delete(headFiles, f)
+			fileSha := common.FileSha(file.Read(f))
+
+			if fileSha != indexValue {
+				*repoModified = append(*repoModified, f)
+			} else if fileSha != headValue {
+				*indexModified = append(*indexModified, f)
 			} else {
-				if common.FileSha(file.Read(f)) != indexValue {
-					repoNew = append(repoNew, f)
-				} else {
-					indexNew = append(indexNew, f)
-				}
+				*notChanged = append(*notChanged, f)
 			}
 		} else {
-			if headValue, ok := headFiles[f]; ok {
-				delete(headFiles, f)
-
-				fmt.Println(f)
-				fmt.Println(common.FileSha(file.Read(f)))
-				fmt.Println(headValue)
-				if common.FileSha(file.Read(f)) != headValue {
-					repoModified = append(repoModified, f)
-				} else {
-					notChanged = append(notChanged, f)
-				}
+			if common.FileSha(file.Read(f)) != indexValue {
+				*repoNew = append(*repoNew, f)
 			} else {
-				repoNew = append(repoNew, f)
+				*indexNew = append(*indexNew, f)
 			}
 		}
-	}
+	} else if inHead {
+		delete(headFiles, f)
 
-	for k, v := range indexFiles {
-		if v == "-" {
-			indexDeleted = append(indexDeleted, k)
-			delete(headFiles, k)
+		if common.FileSha(file.Read(f)) != headValue {
+			*repoModified = append(*repoModified, f)
 		} else {
-			repoDeleted = append(repoDeleted, k)
-			delete(headFiles, k)
+			*notChanged = append(*notChanged, f)
 		}
+	} else {
+		*repoNew = append(*repoNew, f)
 	}
+}
 
-	for k := range headFiles {
-		repoDeleted = append(repoDeleted, k)
+func processRemainingIndexFiles(indexFiles, headFiles map[string]string, repoDeleted, indexDeleted *[]string) {
+	for file, indexValue := range indexFiles {
+		if indexValue == "-" {
+			*indexDeleted = append(*indexDeleted, file)
+		} else {
+			*repoDeleted = append(*repoDeleted, file)
+		}
+		delete(headFiles, file)
 	}
+}
 
-	fmt.Println("Not staged")
-
+func printStatus(header string, newFiles, modifiedFiles, deletedFiles []string) {
+	fmt.Println(header)
 	fmt.Println("\tNew files:")
-	for _, v := range repoNew {
-		fmt.Println("\033[32m\t\t" + v + "\033[0m")
+	for _, file := range newFiles {
+		fmt.Printf("\033[32m\t\t%s\033[0m\n", file)
 	}
-
 	fmt.Println("\tModified files:")
-	for _, v := range repoModified {
-		fmt.Println("\033[33m\t\t" + v + "\033[0m")
+	for _, file := range modifiedFiles {
+		fmt.Printf("\033[33m\t\t%s\033[0m\n", file)
 	}
-
 	fmt.Println("\tDeleted files:")
-	for _, v := range repoDeleted {
-		fmt.Println("\033[31m\t\t" + v + "\033[0m")
+	for _, file := range deletedFiles {
+		fmt.Printf("\033[31m\t\t%s\033[0m\n", file)
 	}
+}
 
-	fmt.Println("Staged")
-
-	fmt.Println("\tNew files:")
-	for _, v := range indexNew {
-		fmt.Println("\033[32m\t\t" + v + "\033[0m")
-	}
-
-	fmt.Println("\tModified files:")
-	for _, v := range indexModified {
-		fmt.Println("\033[33m\t\t" + v + "\033[0m")
-	}
-
-	fmt.Println("\tDeleted files:")
-	for _, v := range indexDeleted {
-		fmt.Println("\033[31m\t\t" + v + "\033[0m")
-	}
-
+func printUnchangedFiles(files []string) {
 	fmt.Println("\nNot changed:")
-	for _, v := range notChanged {
-		fmt.Println("\t" + v)
+	for _, file := range files {
+		fmt.Printf("\t%s\n", file)
 	}
 }
 

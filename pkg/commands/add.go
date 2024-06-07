@@ -9,7 +9,8 @@ import (
 )
 
 func Add(arg string) {
-	if arg[:1] == "." {
+	log.Println("arg: " + arg)
+	if arg[len(arg)-1:] == "." {
 		log.Fatal("Not implemented yet")
 		return
 	}
@@ -21,17 +22,12 @@ func Add(arg string) {
 			objects.AddBlobToIndex("-", arg)
 			return
 		}
-
 	}
 
 	addFile(arg)
 }
 
 func addFile(filePath string) {
-	addBlobFile(filePath)
-}
-
-func addBlobFile(filePath string) {
 	fileSha := objects.SaveBlob(filePath)
 	objects.AddBlobToIndex(fileSha, filePath)
 }
