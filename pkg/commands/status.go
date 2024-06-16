@@ -136,6 +136,10 @@ func getAllFiles(dir string) []string {
 			return nil
 		}
 
+		if strings.Contains(path, ".exe") {
+			return nil
+		}
+
 		files = append(files, path)
 		return nil
 	})

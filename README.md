@@ -6,3 +6,4 @@ Functions:
 - commit
 - cat-file
 - log
+- diff 

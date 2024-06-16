@@ -37,6 +37,8 @@ func main() {
 		}
 	case "log":
 		commands.Log()
+	case "diff":
+		commands.Diff()
 	default:
 		os.Exit(1)
 	}

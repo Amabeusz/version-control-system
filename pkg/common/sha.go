@@ -3,7 +3,6 @@ package common
 import (
 	"crypto/sha1"
 	"encoding/hex"
-	"fmt"
 )
 
 func EncryptSha(bytes []byte) [20]byte {
@@ -11,7 +10,7 @@ func EncryptSha(bytes []byte) [20]byte {
 }
 
 func FileSha(bytes []byte) string {
-	fmt.Println(string(bytes))
+	// fmt.Println(string(bytes))
 	sha := EncryptSha(bytes)
 	return hex.EncodeToString(sha[:])
 }
