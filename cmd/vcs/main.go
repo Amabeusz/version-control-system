@@ -35,6 +35,8 @@ func main() {
 		if len(os.Args) == 4 {
 			commands.CatObjectType(os.Args[2], os.Args[3])
 		}
+	case "log":
+		commands.Log()
 	default:
 		os.Exit(1)
 	}

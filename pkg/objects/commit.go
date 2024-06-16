@@ -20,6 +20,6 @@ func CreateCommit(msg string) {
 	content = append(content, []byte(fmt.Sprintf("author: %v\n\n", config.User()))...)
 	content = append(content, []byte(msg)...)
 
-	SaveObject(content)
-	UpdateRef([]byte(tree))
+	sha := SaveObject(content)
+	UpdateRef([]byte(sha))
 }

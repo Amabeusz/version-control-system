@@ -5,3 +5,4 @@ Functions:
 - add 
 - commit
 - cat-file
+- log
