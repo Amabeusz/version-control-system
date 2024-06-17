@@ -14,6 +14,7 @@ func ReadRoot(filePath string) []byte {
 }
 
 func Read(filePath string) []byte {
+	//log.Println(filePath)
 	file, err := os.Open(filePath)
 	common.Check(err)
 	defer file.Close()

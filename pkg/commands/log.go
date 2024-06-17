@@ -23,7 +23,11 @@ func printLog(commitSha string) {
 	for commitSha != "" {
 		content := string(objects.ReadObject(string(commitSha)))
 
-		fmt.Println(content[strings.Index(content, "\n"):])
+		lines := strings.Split(content, "\n")
+
+		fmt.Printf("\033[33m%s\033[0m\n", commitSha)
+		fmt.Printf("%v\n", lines[3])
+		fmt.Printf("message: %v\n\n", lines[5])
 
 		commitSha = getParentSha(content)
 	}

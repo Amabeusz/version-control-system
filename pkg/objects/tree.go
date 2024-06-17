@@ -47,12 +47,7 @@ func removeLinesContainingHyphen(input string) string {
 }
 
 func ReadTree(sha string) map[string]string {
-	root := common.GetRootPath()
-
-	headCommitContent := string(ReadObject(sha))
-	treeSha := getTreeSha(headCommitContent)
-
-	content := strings.Fields(string(ReadObject(treeSha)))
+	content := strings.Fields(string(ReadObject(sha)))
 
 	files := make(map[string]string, 0)
 
@@ -60,6 +55,7 @@ func ReadTree(sha string) map[string]string {
 		return files
 	}
 
+	root := common.GetRootPath()
 	for i := 1; i < len(content); i += 2 {
 		if content[i] != "-" {
 			files[root+"\\"+content[i+1]] = content[i]

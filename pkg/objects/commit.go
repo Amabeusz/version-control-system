@@ -23,3 +23,10 @@ func CreateCommit(msg string) {
 	sha := SaveObject(content)
 	UpdateRef([]byte(sha))
 }
+
+func ReadCommitTree(sha string) map[string]string {
+	headCommitContent := string(ReadObject(sha))
+	treeSha := getTreeSha(headCommitContent)
+
+	return ReadTree(treeSha)
+}

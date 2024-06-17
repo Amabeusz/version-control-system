@@ -57,11 +57,13 @@ func findLineDifferences(str1, str2 string) []string {
 
 		if line1 != line2 {
 			if line1 != "" {
-				differences = append(differences, fmt.Sprintf("\033[32m+\t\t%v\033[0m", line1))
+				differences = append(differences, fmt.Sprintf("\033[32m+\t%v\033[0m", line1))
 			}
 			if line2 != "" {
-				differences = append(differences, fmt.Sprintf("\033[31m-\t\t%v\033[0m", line2))
+				differences = append(differences, fmt.Sprintf("\033[31m-\t%v\033[0m", line2))
 			}
+		} else {
+			differences = append(differences, fmt.Sprintf("\t%v", line1))
 		}
 	}
 

@@ -26,7 +26,7 @@ func GetHeadFiles() map[string]string {
 		return map[string]string{}
 	}
 
-	return ReadTree(string(ref))
+	return ReadCommitTree(string(ref))
 }
 
 func ReadRef(ref string) []byte {
