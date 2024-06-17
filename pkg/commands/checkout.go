@@ -9,7 +9,6 @@ import (
 )
 
 func Checkout(arg string) {
-
 	content := objects.ReadObject(arg)
 
 	lines := strings.Split(string(content), "\n")
@@ -25,7 +24,6 @@ func Checkout(arg string) {
 
 	for k, v := range tree {
 		fmt.Printf("k: %v, v: %v\n", k, v)
-		file.Create(k, file.Read(k))
+		file.CreateOrOverwrite(k, objects.ReadObject(v))
 	}
-
 }

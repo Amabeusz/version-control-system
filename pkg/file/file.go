@@ -47,6 +47,14 @@ func FindAndWrite(filePath string, content []byte) {
 	Write(file, content)
 }
 
+func CreateOrOverwrite(filePath string, content []byte) {
+	file, err := os.OpenFile(filePath, os.O_CREATE|os.O_TRUNC, 0644)
+	common.Check(err)
+	defer file.Close()
+
+	Write(file, content)
+}
+
 func Write(file *os.File, content []byte) {
 	_, err := file.Write(content)
 	common.Check(err)
